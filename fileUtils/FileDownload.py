@@ -1,5 +1,6 @@
 import requests
 import os
+#Utils to download files.
 
 
 def _download_data(addr, params=None, headers=None):
@@ -17,6 +18,15 @@ def _download_data(addr, params=None, headers=None):
 
 
 def download_file(destinationFile, addr, params=None, headers=None, skipIfExists=False):
+    '''Downloads data and saves to file
+
+    :param destinationFile: The output file
+    :param addr: the address to download data from
+    :param params: the GET parameters
+    :param headers: the GET headers
+    :param skipIfExists: skip if file is already present
+    :return: str:"skipped" if skipped, "ok" if downloaded
+    '''
     if skipIfExists and os.path.exists(destinationFile):
         return "skipped"
 
@@ -27,6 +37,18 @@ def download_file(destinationFile, addr, params=None, headers=None, skipIfExists
 
 
 def download_sdmx_file(destinationFile, addr, dataflowId, dq, params, headers=None, apikey=None, skipIfExists=False):
+    '''
+    Downloads a SDMX file, it is just a wrapper to build the call in SDMX format
+    :param destinationFile: The output file
+    :param addr: the address to download data from
+    :param dataflowId: The id of the SMDX dataflow
+    :param dq: The SDMX data query
+    :param params: the GET params
+    :param headers:the GET headers
+    :param apikey: optional API key
+    :param skipIfExists:  skip if file is already present
+    :return: str:"skipped" if skipped, "ok" if downloaded
+    '''
     toCall = (addr + ",".join(dataflowId) + "/" + dq)
     if (apikey is not None):
         params["subscription-key"] = apikey
@@ -34,5 +56,17 @@ def download_sdmx_file(destinationFile, addr, dataflowId, dq, params, headers=No
 
 
 def download_eurostat_sdmx_file(destinationFile, addr, dataflowId, dq, params, headers=None, skipIfExists=False):
+    '''
+    Downloads a SDMX file from EUROSTAT , it is just a wrapper to build the call in EUROSTAT-SDMX format
+    :param destinationFile: The output file
+    :param addr: the address to download data from
+    :param dataflowId: The id of the SMDX dataflow
+    :param dq: The SDMX data query
+    :param params: the GET params
+    :param headers:the GET headers
+    :param apikey: optional API key
+    :param skipIfExists:  skip if file is already present
+    :return: str:"skipped" if skipped, "ok" if downloaded
+    '''
     toCall = addr + "/" + dataflowId + "/" + dq
     return download_file(destinationFile, toCall, params, headers=headers, skipIfExists=skipIfExists)

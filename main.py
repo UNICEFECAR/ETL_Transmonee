@@ -9,13 +9,14 @@ pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 
+#TODO: as params
 BASE_DIR = "Z:\\TransMonee\\01_getData"
 DIR_dataDownload_UNESCO = BASE_DIR + "\\" + "dl\\unesco"
 DIR_dataDownload_EUROSTAT = BASE_DIR + "\\" + "dl\\eurostat"
-
 DIR_output = BASE_DIR + "\\" + "out"
 OUT_FILE = "ETL_out.csv"
 
+#the output format
 dsd = [
     {"id": "Dataflow", "type": "string"},
     {"id": "REF_AREA", "type": "enum",
@@ -33,32 +34,8 @@ dsd = [
     {"id": "UNIT_MULTIPLIER", "type": "string"},
     {"id": "OBS_STATUS", "type": "string"},
 ]
-
-# dest = dest.destination(dsd)
+#Create a structure object with the dsd.
 struct = structure.structure.dsd(dsd)
-
-countryMap_EUROSTAT = {"REF_AREA": {
-    # "AL": "ALB",
-    # "AM": "ARM",
-    # "AZ": "AZE",
-    "BA": "BIH",
-    "BG": "BGR",
-    # "BY": "BLR",
-    # "GE": "GEO",
-    "HR": "HRV",
-    # "KG": "KGZ",
-    # "KZ": "KAZ",
-    # "MD": "MDA",
-    "ME": "MNE",
-    "MK": "MKD",
-    "RO": "ROU",
-    "RS": "SRB",
-    # "TJ": "TJK",
-    # "TM": "TKM",
-    "TR": "TUR",
-    # "UA": "UKR",
-    # "UZ": "UZB",
-}}
 
 destination = pd.DataFrame(columns=struct.getCSVColumns(), dtype=str)
 # UNESCO
