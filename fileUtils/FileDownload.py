@@ -27,13 +27,14 @@ def download_file(destinationFile, addr, params=None, headers=None, skipIfExists
     :param skipIfExists: skip if file is already present
     :return: str:"skipped" if skipped, "ok" if downloaded
     '''
+
     if skipIfExists and os.path.exists(destinationFile):
         return "skipped"
 
     data = _download_data(addr, params, headers)
     with open(destinationFile, 'wb') as f:
         f.write(data)
-    return "ok"
+    return "downloaded"
 
 
 def download_sdmx_file(destinationFile, addr, dataflowId, dq, params, headers=None, apikey=None, skipIfExists=False):
@@ -47,12 +48,13 @@ def download_sdmx_file(destinationFile, addr, dataflowId, dq, params, headers=No
     :param headers:the GET headers
     :param apikey: optional API key
     :param skipIfExists:  skip if file is already present
-    :return: str:"skipped" if skipped, "ok" if downloaded
+    :return: str:"skipped" if skipped, "downloaded" if downloaded
     '''
     toCall = (addr + ",".join(dataflowId) + "/" + dq)
     if (apikey is not None):
         params["subscription-key"] = apikey
-    return download_file(destinationFile, toCall, params, headers, skipIfExists)
+    ret = download_file(destinationFile, toCall, params, headers, skipIfExists)
+    return ret
 
 
 def download_eurostat_sdmx_file(destinationFile, addr, dataflowId, dq, params, headers=None, skipIfExists=False):
