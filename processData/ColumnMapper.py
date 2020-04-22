@@ -14,7 +14,7 @@ class ColumnMapper:
         '''
         ret = {}
         for c in self.columnMap:
-            if (self.columnMap[c]["type"] == "const"):
+            if (self.columnMap[c]["type"] == "const" and c in const):
                 ret[c] = const[c]
             elif (self.columnMap[c]["type"] == "col"):
                 ret[c] = row[self.columnMap[c]["value"]]

@@ -1,4 +1,5 @@
 import fileUtils.FileDownload
+import fileUtils.CsvUtils
 
 import os.path
 import pandas as pd
@@ -18,42 +19,23 @@ UIS_PARAMS = {"url": "https://api.uis.unesco.org/sdmx/data/",
                   "Accept-Encoding": "gzip",
               }}
 
-_toProcess_UIS_dfSDG4 = [
-    {"dataflowId": ["UNESCO", "SDG4", "2.0"],
-     "dq": "GER.PT.L01.._T..............AL+AM+AZ+BA+BG+BY+CZ+EE+GE+HR+HU+KG+KZ+LT+LV+MD+ME+MK+PL+RO+RS+RU+SI+SV+TJ+TM+TR+UA+UZ",
-     "params": {"startPeriod": "2000", "endPeriod": "2050", "locale": "en"},
-     "tmp_file": "SDG4_01.csv",
-     "const": {
-         # "INDICATOR": "Children in early childhood educational development programs (gross enrolment ratio, % of children aged 0-2)",
-         "UNICEF_INDICATOR": "EDU_GER_Y0T2",
-         "Dataflow": "ECARO:TRANSMONEE(1.0)",
-         "DATA_SOURCE": "UIS",
-         "OBS_FOOTNOTE": ""}
-     },
-    {"dataflowId": ["UNESCO", "SDG4", "2.0"],
-     "dq": "FREE_EDU.YR.L02................AL+AM+AZ+BA+BG+BY+CZ+EE+GE+HR+HU+KG+KZ+LT+LV+MD+ME+MK+PL+RO+RS+RU+SI+SV+TJ+TM+TR+UA+UZ",
-     "params": {"startPeriod": "2000", "endPeriod": "2050", "locale": "en"},
-     "tmp_file": "SDG4_02.csv",
-     "const": {
-         # "INDICATOR": "Number of years of free pre-primary education guaranteed in legal framework (SDG 4.2.5)",
-         "UNICEF_INDICATOR": "EDU_FREE_EDU",
-         "Dataflow": "ECARO:TRANSMONEE(1.0)",
-         "DATA_SOURCE": "UIS",
-         "OBS_FOOTNOTE": ""}
+sdg4_datalist = fileUtils.CsvUtils.readDictionaryFromCSV("Z:\\TransMonee\\src\\EDU_UIS_SDG4_toDown.csv")
+_toProcess_UIS_dfSDG4 = []
+params = {"startPeriod": "2000", "endPeriod": "2050", "locale": "en"}
+for l in sdg4_datalist:
+    _toProcess_UIS_dfSDG4.append(
+        {"dataflowId": [l['agency'], l['df'], l['ver']],
+         "dq": l["dq"],
+         "params": params,
+         "tmp_file": l["tmp_file"],
+         "const": {
+             "UNICEF_INDICATOR": l["UNICEF_INDICATOR"],
+             "DATA_SOURCE": l["DATA_SOURCE"],
+             "OBS_FOOTNOTE": l["OBS_FOOTNOTE"]
+         }
 
-     },
-    {"dataflowId": ["UNESCO", "SDG4", "2.0"],
-     "dq": "COMP_EDU.YR.L02................AL+AM+AZ+BA+BG+BY+CZ+EE+GE+HR+HU+KG+KZ+LT+LV+MD+ME+MK+PL+RO+RS+RU+SI+SV+TJ+TM+TR+UA+UZ",
-     "params": {"startPeriod": "2000", "endPeriod": "2050", "locale": "en"},
-     "tmp_file": "SDG4_03.csv",
-     "const": {
-         # "INDICATOR": "Number of years of compulsory pre-primary education guaranteed in legal framework (SDG 4.2.5)",
-         "UNICEF_INDICATOR": "EDU_COMPEDU",
-         "Dataflow": "ECARO:TRANSMONEE(1.0)",
-         "DATA_SOURCE": "UIS",
-         "OBS_FOOTNOTE": "", }
-     }
-]
+         }
+    )
 
 _toProcess_UIS_dfEDU_NON_FINANCE = [
     {"dataflowId": ["UNESCO", "EDU_NON_FINANCE", "3.0"],
@@ -233,7 +215,72 @@ _toProcess_UIS_dfEDU_NON_FINANCE = [
             "OBS_FOOTNOTE": "",
         }
     },
-    # UIS https://api.uis.unesco.org/sdmx/data/UNESCO,EDU_NON_FINANCE,3.0/STU.PER.L3._T._T+F+M...INST_T..............AL+AM+AZ+BA+BG+BY+GE+HR+KG+KZ+MD+ME+MK+RO+RS+TJ+TM+TR+UA+UZ?startPeriod=2000&endPeriod=2050&format=sdmx-compact-2.0&locale=en&subscription-key=9d48382df9ad408ca538352a4186791b
+    {
+        "dataflowId": ["UNESCO", "EDU_NON_FINANCE", "3.0"],
+        "dq": "FEP..L3...................AL+AM+AZ+BA+BG+BY+CZ+EE+GE+HR+HU+KG+KZ+LT+LV+MD+ME+MK+PL+RO+RS+RU+SI+SV+TJ+TM+TR+UA+UZ",
+        "params": {"startPeriod": "2000", "endPeriod": "2050", "locale": "en"},
+        "tmp_file": "EDU_15.csv",
+        "const": {
+            # "INDICATOR": "Percentage of females in upper secondary education (ISCED 3) (% of all students enrolled in the respective level of education)",
+            "UNICEF_INDICATOR": "EDU_FEP_L3",
+            "Dataflow": "ECARO:TRANSMONEE(1.0)",
+            "DATA_SOURCE": "UIS",
+            "OBS_FOOTNOTE": "",
+        }
+    },
+    {
+        "dataflowId": ["UNESCO", "EDU_NON_FINANCE", "3.0"],
+        "dq": "FEP..L3.C4..................AL+AM+AZ+BA+BG+BY+CZ+EE+GE+HR+HU+KG+KZ+LT+LV+MD+ME+MK+PL+RO+RS+RU+SI+SV+TJ+TM+TR+UA+UZ",
+        "params": {"startPeriod": "2000", "endPeriod": "2050", "locale": "en"},
+        "tmp_file": "EDU_16.csv",
+        "const": {
+            # "INDICATOR": "Percentage of females in general upper-secondary education  (% of all students enrolled in the respective level of education)",
+            "UNICEF_INDICATOR": "EDU_FEP_L3_C4",
+            "Dataflow": "ECARO:TRANSMONEE(1.0)",
+            "DATA_SOURCE": "UIS",
+            "OBS_FOOTNOTE": "",
+        }
+    },
+    {
+        "dataflowId": ["UNESCO", "EDU_NON_FINANCE", "3.0"],
+        "dq": "FEP..L3.C5..................AL+AM+AZ+BA+BG+BY+CZ+EE+GE+HR+HU+KG+KZ+LT+LV+MD+ME+MK+PL+RO+RS+RU+SI+SV+TJ+TM+TR+UA+UZ",
+        "params": {"startPeriod": "2000", "endPeriod": "2050", "locale": "en"},
+        "tmp_file": "EDU_17.csv",
+        "const": {
+            # "INDICATOR": "Percentage of females in vocational upper-secondary education  (% of all students enrolled in the respective level of education)",
+            "UNICEF_INDICATOR": "EDU_FEP_L3_C5",
+            "Dataflow": "ECARO:TRANSMONEE(1.0)",
+            "DATA_SOURCE": "UIS",
+            "OBS_FOOTNOTE": "",
+        }
+    },
+    {
+        "dataflowId": ["UNESCO", "EDU_NON_FINANCE", "3.0"],
+        "dq": "STU.PER.L3.C4._T+F+M...INST_T..............AL+AM+AZ+BA+BG+BY+CZ+EE+GE+HR+HU+KG+KZ+LT+LV+MD+ME+MK+PL+RO+RS+RU+SI+SV+TJ+TM+TR+UA+UZ",
+        "params": {"startPeriod": "2000", "endPeriod": "2050", "locale": "en"},
+        "tmp_file": "EDU_18.csv",
+        "const": {
+            # "INDICATOR": "Upper secondary enrolment by program orientation - General (number)",
+            "UNICEF_INDICATOR": "EDU_FEP_L3_C4",
+            "Dataflow": "ECARO:TRANSMONEE(1.0)",
+            "DATA_SOURCE": "UIS",
+            "OBS_FOOTNOTE": "",
+        }
+    },
+    {
+        "dataflowId": ["UNESCO", "EDU_NON_FINANCE", "3.0"],
+        "dq": "STU.PER.L3.C5._T+F+M...INST_T..............AL+AM+AZ+BA+BG+BY+CZ+EE+GE+HR+HU+KG+KZ+LT+LV+MD+ME+MK+PL+RO+RS+RU+SI+SV+TJ+TM+TR+UA+UZ",
+        "params": {"startPeriod": "2000", "endPeriod": "2050", "locale": "en"},
+        "tmp_file": "EDU_19.csv",
+        "const": {
+            # "INDICATOR": "Upper secondary enrolment by program orientation - Vocational (number)",
+            "UNICEF_INDICATOR": "EDU_FEP_L3_C5",
+            "Dataflow": "ECARO:TRANSMONEE(1.0)",
+            "DATA_SOURCE": "UIS",
+            "OBS_FOOTNOTE": "",
+        }
+    },
+    # UIS https://api.uis.unesco.org/sdmx/data/UNESCO,EDU_NON_FINANCE,3.0/STU.PER.L3.C5._T+F+M...INST_T..............AL+AM+AZ+BA+BG+BY+GE+HR+KG+KZ+MD+ME+MK+RO+RS+TJ+TM+TR+UA+UZ?startPeriod=2000&endPeriod=2050&format=sdmx-compact-2.0&locale=en&subscription-key=9d48382df9ad408ca538352a4186791b
 
 ]
 
@@ -305,14 +352,14 @@ def download_data(outfile_path, skipIfExists=False, verb=0):
         if verb >= 3:
             print(toDown['tmp_file'] + " " + res)
 
-    for toDown in _toProcess_UIS_dfEDU_NON_FINANCE:
-        outFilePath = os.path.join(outfile_path, toDown['tmp_file'])
-        res = fileUtils.FileDownload.download_sdmx_file(outFilePath, UIS_PARAMS['url'], toDown['dataflowId'],
-                                                        toDown["dq"],
-                                                        params=toDown["params"], headers=UIS_PARAMS['headers'],
-                                                        apikey=UIS_API_KEY, skipIfExists=skipIfExists)
-        if verb >= 3:
-            print(toDown['tmp_file'] + " " + res)
+    # for toDown in _toProcess_UIS_dfEDU_NON_FINANCE:
+    #     outFilePath = os.path.join(outfile_path, toDown['tmp_file'])
+    #     res = fileUtils.FileDownload.download_sdmx_file(outFilePath, UIS_PARAMS['url'], toDown['dataflowId'],
+    #                                                     toDown["dq"],
+    #                                                     params=toDown["params"], headers=UIS_PARAMS['headers'],
+    #                                                     apikey=UIS_API_KEY, skipIfExists=skipIfExists)
+    #     if verb >= 3:
+    #         print(toDown['tmp_file'] + " " + res)
 
 
 def _process(input_file, process, code_map, col_map, constants, check_for_dups=True):
@@ -340,7 +387,7 @@ def getdata(workingPath, cols):
     for p in _toProcess_UIS_dfSDG4:
         toAdd = _process(os.path.join(workingPath, p['tmp_file']), p, codemap_UNESCO, colMap_UNESCO, p['const'])
         ret = ret.append(toAdd)
-    for p in _toProcess_UIS_dfEDU_NON_FINANCE:
-        toAdd = _process(os.path.join(workingPath, p['tmp_file']), p, codemap_UNESCO, colMap_UNESCO, p['const'])
-        ret = ret.append(toAdd)
+    # for p in _toProcess_UIS_dfEDU_NON_FINANCE:
+    #     toAdd = _process(os.path.join(workingPath, p['tmp_file']), p, codemap_UNESCO, colMap_UNESCO, p['const'])
+    #     ret = ret.append(toAdd)
     return ret
