@@ -5,6 +5,8 @@ import structure.structure
 import tasks.unesco.unesco
 import tasks.eurostat.eurostat
 
+
+
 '''
 The script downloads the data sources from APIs when available.
 Transforms the data in a common format ready to be uplaoded in the SDMX data warehouse
@@ -34,6 +36,9 @@ dsd = [
     {"id": "SEX", "type": "string", "role": "dim"},
     {"id": "AGE", "type": "string", "role": "dim"},
     {"id": "RESIDENCE", "type": "string", "role": "dim", "codes": ["_T", "U", "R"]},
+    {"id": "WEALTH_QUINTILE", "type": "string", "role": "dim",
+     "codes": ["_T", "Q1", "Q2", "Q3", "Q4", "Q5", "B20", "B40", "B60", "B80", "M40", "M60", "R20", "R40", "R60",
+               "R80"]},
     {"id": "TIME_PERIOD", "type": "string", "role": "time"},
     {"id": "OBS_VALUE", "type": "string"},
     {"id": "UNIT_MEASURE", "type": "string"},
@@ -65,9 +70,20 @@ task.download_data(DIR_dataDownload_UNESCO, True, verb=3)
 srcData = task.getdata(DIR_dataDownload_UNESCO, struct.getCSVColumns(), filterFunction=filterSDG4)
 destination = destination.append(srcData)
 # UNESCO EDUNonFinance dataflow dataflow
+def filterEduNonFin(df):
+    # just keep the _T as Education field
+    ret = df[df["EDU_FIELD"].str.contains("_T") | df["EDU_FIELD"].str.contains("_Z")]
+    # just keep the _T as Grade
+    ret = ret[ret["GRADE"].str.contains("_T") | ret["GRADE"].str.contains("_Z")]
+    # just keep the _T as EDU_TYPE
+    ret = ret[ret["EDU_TYPE"].str.contains("_T") | ret["EDU_TYPE"].str.contains("_Z")]
+    # just keep the _T as EDU_TYPE
+    ret = ret[ret["EDU_CAT"].str.contains("_T") | ret["EDU_CAT"].str.contains("_Z")]
+
+    return ret
 task = tasks.unesco.unesco.UNESCO(UNESCO_SOURCE_CONFIG_EDUNONFIN)
 task.download_data(DIR_dataDownload_UNESCO, True, verb=3)
-srcData = task.getdata(DIR_dataDownload_UNESCO, struct.getCSVColumns(), filterFunction=None)
+srcData = task.getdata(DIR_dataDownload_UNESCO, struct.getCSVColumns(), filterFunction=filterEduNonFin)
 destination = destination.append(srcData)
 
 # tasks.unesco.unesco.download_data(DIR_dataDownload_UNESCO, True, verb=3)
@@ -81,5 +97,9 @@ destination = destination.append(srcData)
 
 duplicates = destination[destination.duplicated(subset=struct.get_dims(), keep=False)]
 print(duplicates)
+
+destination['Dataflow']="ECARO:TRANSMONEE(1.0)"
+destination.columns=struct.getCSVColumns()
+
 
 destination.to_csv(os.path.join(DIR_output, OUT_FILE), sep=",", header=True, encoding="utf-8", index=False)

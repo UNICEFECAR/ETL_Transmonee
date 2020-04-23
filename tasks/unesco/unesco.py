@@ -28,6 +28,7 @@ class UNESCO:
         "UNICEF_INDICATOR": {"type": "const", "role": "dim", "value": ""},
         "SEX": {"type": "col", "role": "dim", "value": "SEX"},
         "AGE": {"type": "col", "role": "dim", "value": "AGE"},
+        "WEALTH_QUINTILE": {"type": "col", "role": "dim", "value": "WEALTH_QUINTILE"},
         "RESIDENCE": {"type": "col", "role": "dim", "value": "LOCATION"},
         "TIME_PERIOD": {"type": "col", "role": "time", "value": "TIME_PERIOD"},
         "OBS_VALUE": {"type": "col", "role": "obs", "value": "OBS_VALUE"},
@@ -130,14 +131,6 @@ class UNESCO:
                 src[col].replace(m, code_map[col][m], inplace=True)
 
         return colMapper.mapDataframe(src, constants)
-
-    # def applySDG4Filters(df):
-    #     # just keep the _T as socioeconomic background
-    #     ret = df[df["SE_BKGRD"].str.contains("_T") | df["SE_BKGRD"].str.contains("_Z")]
-    #     # just keep the _T as Immigration status
-    #     ret = ret[ret["IMM_STATUS"].str.contains("_T") | ret["IMM_STATUS"].str.contains("_Z")]
-    #
-    #     return ret
 
     def getdata(self, workingPath, cols, filterFunction=None):
         ret = pd.DataFrame(columns=cols, dtype=str)
