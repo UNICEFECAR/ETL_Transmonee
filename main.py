@@ -21,7 +21,8 @@ DIR_dataDownload_EUROSTAT = BASE_DIR + "\\" + "dl\\eurostat"
 DIR_output = BASE_DIR + "\\" + "out"
 OUT_FILE = "ETL_out.csv"
 
-UNESCO_SOURCE_CONFIG = "source_configs\\unesco\\EDU_UIS_SDG4_toDown.csv"
+UNESCO_SOURCE_CONFIG_SDG4 = "source_configs\\unesco\\EDU_UIS_SDG4_toDown.csv"
+UNESCO_SOURCE_CONFIG_EDUNONFIN = "source_configs\\unesco\\EDU_UIS_EDUNONFIN_toDown.csv"
 
 # the output format (similar to a SDMX Data Structure Definition)
 dsd = [
@@ -48,7 +49,9 @@ struct = structure.structure.dsd(dsd)
 # The destiantion dataframe
 destination = pd.DataFrame(columns=struct.getCSVColumns(), dtype=str)
 
+
 # Start processing UNESCO data: download and get destination-shaped data
+# UNESCO SDG4 dataflow
 def filterSDG4(df):
     # just keep the _T as socioeconomic background
     ret = df[df["SE_BKGRD"].str.contains("_T") | df["SE_BKGRD"].str.contains("_Z")]
@@ -56,11 +59,16 @@ def filterSDG4(df):
     ret = ret[ret["IMM_STATUS"].str.contains("_T") | ret["IMM_STATUS"].str.contains("_Z")]
     return ret
 
-#task = tasks.unesco.unesco.UNESCO("Z:\\TransMonee\\src\\EDU_UIS_SDG4_toDown.csv")
-task = tasks.unesco.unesco.UNESCO(UNESCO_SOURCE_CONFIG)
+
+task = tasks.unesco.unesco.UNESCO(UNESCO_SOURCE_CONFIG_SDG4)
 task.download_data(DIR_dataDownload_UNESCO, True, verb=3)
-srcData=task.getdata(DIR_dataDownload_UNESCO,struct.getCSVColumns(), filterSDG4)
-destination=destination.append(srcData)
+srcData = task.getdata(DIR_dataDownload_UNESCO, struct.getCSVColumns(), filterFunction=filterSDG4)
+destination = destination.append(srcData)
+# UNESCO EDUNonFinance dataflow dataflow
+task = tasks.unesco.unesco.UNESCO(UNESCO_SOURCE_CONFIG_EDUNONFIN)
+task.download_data(DIR_dataDownload_UNESCO, True, verb=3)
+srcData = task.getdata(DIR_dataDownload_UNESCO, struct.getCSVColumns(), filterFunction=None)
+destination = destination.append(srcData)
 
 # tasks.unesco.unesco.download_data(DIR_dataDownload_UNESCO, True, verb=3)
 # srcData = tasks.unesco.unesco.getdata(DIR_dataDownload_UNESCO, struct.getCSVColumns())
