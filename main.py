@@ -1,18 +1,17 @@
 import os.path
 import pandas as pd
 import structure.structure
+import numpy as np
 
 import tasks.unesco.unesco
 import tasks.eurostat.eurostat
-
-
 
 '''
 The script downloads the data sources from APIs when available.
 Transforms the data in a common format ready to be uplaoded in the SDMX data warehouse
 '''
 
-pd.set_option('display.max_rows', 500)
+pd.set_option('display.min_rows', 50000)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 
@@ -25,6 +24,7 @@ OUT_FILE = "ETL_out.csv"
 
 UNESCO_SOURCE_CONFIG_SDG4 = "source_configs\\unesco\\EDU_UIS_SDG4_toDown.csv"
 UNESCO_SOURCE_CONFIG_EDUNONFIN = "source_configs\\unesco\\EDU_UIS_EDUNONFIN_toDown.csv"
+UNESCO_SOURCE_CONFIG_EDUFIN = "source_configs\\unesco\\EDU_UIS_EDUFIN_toDown.csv"
 
 # the output format (similar to a SDMX Data Structure Definition)
 dsd = [
@@ -54,52 +54,161 @@ struct = structure.structure.dsd(dsd)
 # The destiantion dataframe
 destination = pd.DataFrame(columns=struct.getCSVColumns(), dtype=str)
 
-
 # Start processing UNESCO data: download and get destination-shaped data
+
+colMap_UNESCO_SDG4_EDUNONFIN = {
+
+    "REF_AREA": {"type": "col", "role": "dim", "value": "REF_AREA"},
+    "UNICEF_INDICATOR": {"type": "const", "role": "dim", "value": ""},
+    "SEX": {"type": "col", "role": "dim", "value": "SEX"},
+    "AGE": {"type": "col", "role": "dim", "value": "AGE"},
+    "WEALTH_QUINTILE": {"type": "col", "role": "dim", "value": "WEALTH_QUINTILE"},
+    "RESIDENCE": {"type": "col", "role": "dim", "value": "LOCATION"},
+    "TIME_PERIOD": {"type": "col", "role": "time", "value": "TIME_PERIOD"},
+    "OBS_VALUE": {"type": "col", "role": "obs", "value": "OBS_VALUE"},
+    "UNIT_MEASURE": {"type": "col", "role": "attrib", "value": "UNIT_MEASURE"},
+    "OBS_FOOTNOTE": {"type": "const", "role": "attrib", },
+    "FREQ": {"type": "col", "role": "attrib", "value": "FREQ"},
+    "DATA_SOURCE": {"type": "const", "role": "attrib", "value": "UIS"},
+    "UNIT_MULTIPLIER": {"type": "col", "role": "attrib", "value": "UNIT_MULT"},
+    "OBS_STATUS": {"type": "col", "role": "attrib", "value": "OBS_STATUS"},
+}
+
+UNESCO_COUNTRY_MAP = {"REF_AREA": {
+    "AL": "ALB",
+    "AM": "ARM",
+    "AZ": "AZE",
+    "BA": "BIH",
+    "BG": "BGR",
+    "BY": "BLR",
+    "CZ": "CZE",
+    "EE": "EST",
+    "GE": "GEO",
+    "HR": "HRV",
+    "HU": "HUN",
+    "KG": "KGZ",
+    "KZ": "KAZ",
+    "LT": "LTU",
+    "LV": "LVA",
+    "MD": "MDA",
+    "ME": "MNE",
+    "MK": "MKD",
+    "PL": "POL",
+    "RO": "ROU",
+    "RS": "SRB",
+    "RU": "RUS",
+    "SI": "SVN",
+    "SK": "SVK",
+    "TJ": "TJK",
+    "TM": "TKM",
+    "TR": "TUR",
+    "UA": "UKR",
+    "UZ": "UZB",
+}}
+UNESCO_CODEMAP_SDG4_EDUNONFIN = {
+    "UNIT_MEASURE": {
+        "PER": "PS",
+        "PT": "PCNT",
+    },
+    "AGE": {
+        "UNDER1_AGE": "M023",
+    },
+    "LOCATION": {
+        "RUR": "R",
+        "URB": "U",
+        "_Z": "_T",
+        "_T": "_T"
+    },
+    "WEALTH_QUINTILE": {
+        "_Z": "_T"
+    }
+}
+
+
 # UNESCO SDG4 dataflow
 def filterSDG4(df):
     # just keep the _T as socioeconomic background
-    ret = df[df["SE_BKGRD"].str.contains("_T") | df["SE_BKGRD"].str.contains("_Z")]
+    ret = df[(df["SE_BKGRD"] == "_T") | (df["SE_BKGRD"] == "_Z")]
     # just keep the _T as Immigration status
-    ret = ret[ret["IMM_STATUS"].str.contains("_T") | ret["IMM_STATUS"].str.contains("_Z")]
+    ret = ret[(ret["IMM_STATUS"] == "_T") | (ret["IMM_STATUS"] == "_Z")]
     return ret
 
 
-task = tasks.unesco.unesco.UNESCO(UNESCO_SOURCE_CONFIG_SDG4)
+task = tasks.unesco.unesco.UNESCO(UNESCO_SOURCE_CONFIG_SDG4, colMap_UNESCO_SDG4_EDUNONFIN,
+                                  {**UNESCO_COUNTRY_MAP, **UNESCO_CODEMAP_SDG4_EDUNONFIN})
 task.download_data(DIR_dataDownload_UNESCO, True, verb=3)
 srcData = task.getdata(DIR_dataDownload_UNESCO, struct.getCSVColumns(), filterFunction=filterSDG4)
 destination = destination.append(srcData)
-# UNESCO EDUNonFinance dataflow dataflow
+
+
+# UNESCO EDUNonFinance dataflow
 def filterEduNonFin(df):
     # just keep the _T as Education field
-    ret = df[df["EDU_FIELD"].str.contains("_T") | df["EDU_FIELD"].str.contains("_Z")]
+    ret = df[(df["EDU_FIELD"]=="_T") | (df["EDU_FIELD"]=="_Z")]
     # just keep the _T as Grade
-    ret = ret[ret["GRADE"].str.contains("_T") | ret["GRADE"].str.contains("_Z")]
+    ret = ret[(ret["GRADE"]=="_T") | (ret["GRADE"]=="_Z")]
     # just keep the _T as EDU_TYPE
-    ret = ret[ret["EDU_TYPE"].str.contains("_T") | ret["EDU_TYPE"].str.contains("_Z")]
+    ret = ret[(ret["EDU_TYPE"]=="_T") | (ret["EDU_TYPE"]=="_Z")]
     # just keep the _T as EDU_TYPE
-    ret = ret[ret["EDU_CAT"].str.contains("_T") | ret["EDU_CAT"].str.contains("_Z")]
+    ret = ret[(ret["EDU_CAT"]=="_T") | (ret["EDU_CAT"]=="_Z")]
 
     return ret
-task = tasks.unesco.unesco.UNESCO(UNESCO_SOURCE_CONFIG_EDUNONFIN)
+
+
+task = tasks.unesco.unesco.UNESCO(UNESCO_SOURCE_CONFIG_EDUNONFIN, colMap_UNESCO_SDG4_EDUNONFIN,
+                                  {**UNESCO_COUNTRY_MAP, **UNESCO_CODEMAP_SDG4_EDUNONFIN})
 task.download_data(DIR_dataDownload_UNESCO, True, verb=3)
 srcData = task.getdata(DIR_dataDownload_UNESCO, struct.getCSVColumns(), filterFunction=filterEduNonFin)
 destination = destination.append(srcData)
 
-# tasks.unesco.unesco.download_data(DIR_dataDownload_UNESCO, True, verb=3)
-# srcData = tasks.unesco.unesco.getdata(DIR_dataDownload_UNESCO, struct.getCSVColumns())
-# destination = destination.append(srcData)
+# UNESCO EDUFinance dataflow
+UNESCO_CODEMAP_EDUFIN = {
 
-# Start processing EUROSTAT data: download and get destination-shaped data
-# tasks.eurostat.eurostat.download_data(DIR_dataDownload_EUROSTAT, skipIfExists=True, verb=3)
-# srcData = tasks.eurostat.eurostat.getdata(DIR_dataDownload_EUROSTAT, struct.getCSVColumns())
-# destination = destination.append(srcData)
+}
+colMap_UNESCO_EDUFIN = {
+    "REF_AREA": {"type": "col", "role": "dim", "value": "REF_AREA"},
+    "UNICEF_INDICATOR": {"type": "const", "role": "dim", "value": ""},
+    "SEX": {"type": "const", "role": "dim"},
+    "AGE": {"type": "const", "role": "dim"},
+    "WEALTH_QUINTILE": {"type": "const", "role": "dim"},
+    "RESIDENCE": {"type": "const", "role": "dim"},
+    "TIME_PERIOD": {"type": "col", "role": "time", "value": "TIME_PERIOD"},
+    "OBS_VALUE": {"type": "col", "role": "obs", "value": "OBS_VALUE"},
+    "UNIT_MEASURE": {"type": "col", "role": "attrib", "value": "UNIT_MEASURE"},
+    "OBS_FOOTNOTE": {"type": "const", "role": "attrib", },
+    "FREQ": {"type": "col", "role": "attrib", "value": "FREQ"},
+    "DATA_SOURCE": {"type": "const", "role": "attrib", "value": "UIS"},
+    "UNIT_MULTIPLIER": {"type": "col", "role": "attrib", "value": "UNIT_MULT"},
+    "OBS_STATUS": {"type": "col", "role": "attrib", "value": "OBS_STATUS"},
+}
+
+
+def filterEduFin(df):
+    # just keep the _T as Type of expenditure
+
+    ret = df[df["EXPENDITURE_TYPE"] == "_T"]
+    # just keep the _T as Funding Flow
+    ret = ret[ret["FUND_FLOW"] == "_T"]
+
+    return ret
+
+
+task = tasks.unesco.unesco.UNESCO(UNESCO_SOURCE_CONFIG_EDUFIN, colMap_UNESCO_EDUFIN, UNESCO_COUNTRY_MAP)
+task.download_data(DIR_dataDownload_UNESCO, True, verb=3)
+srcData = task.getdata(DIR_dataDownload_UNESCO, struct.getCSVColumns(), filterFunction=filterEduFin)
+destination = destination.append(srcData)
 
 duplicates = destination[destination.duplicated(subset=struct.get_dims(), keep=False)]
-print(duplicates)
+if duplicates.empty:
+    print("No duplicates found")
+else:
+    duplicates = duplicates[struct.get_dims()]
+    # print(duplicates)
 
-destination['Dataflow']="ECARO:TRANSMONEE(1.0)"
-destination.columns=struct.getCSVColumns()
+# remove blanks
+destination.dropna(subset=["OBS_VALUE"], inplace=True)
 
+destination['Dataflow'] = "ECARO:TRANSMONEE(1.0)"
+destination.columns = struct.getCSVColumns()
 
 destination.to_csv(os.path.join(DIR_output, OUT_FILE), sep=",", header=True, encoding="utf-8", index=False)

@@ -22,86 +22,24 @@ class UNESCO:
 
     query_params = {"startPeriod": "2000", "endPeriod": "2050", "locale": "en"}
 
-    colMap_UNESCO = {
-        "Dataflow": {"type": "const", "value": "ECARO:TRANSMONEE(1.0)"},
-        "REF_AREA": {"type": "col", "role": "dim", "value": "REF_AREA"},
-        "UNICEF_INDICATOR": {"type": "const", "role": "dim", "value": ""},
-        "SEX": {"type": "col", "role": "dim", "value": "SEX"},
-        "AGE": {"type": "col", "role": "dim", "value": "AGE"},
-        "WEALTH_QUINTILE": {"type": "col", "role": "dim", "value": "WEALTH_QUINTILE"},
-        "RESIDENCE": {"type": "col", "role": "dim", "value": "LOCATION"},
-        "TIME_PERIOD": {"type": "col", "role": "time", "value": "TIME_PERIOD"},
-        "OBS_VALUE": {"type": "col", "role": "obs", "value": "OBS_VALUE"},
-        "UNIT_MEASURE": {"type": "col", "role": "attrib", "value": "UNIT_MEASURE"},
-        "OBS_FOOTNOTE": {"type": "const", "role": "attrib", },
-        "FREQ": {"type": "col", "role": "attrib", "value": "FREQ"},
-        "DATA_SOURCE": {"type": "const", "role": "attrib", "value": "UIS"},
-        "UNIT_MULTIPLIER": {"type": "col", "role": "attrib", "value": "UNIT_MULT"},
-        "OBS_STATUS": {"type": "col", "role": "attrib", "value": "OBS_STATUS"},
-    }
-
-    codemap_UNESCO = {"REF_AREA": {
-        "AL": "ALB",
-        "AM": "ARM",
-        "AZ": "AZE",
-        "BA": "BIH",
-        "BG": "BGR",
-        "BY": "BLR",
-        "CZ": "CZE",
-        "EE": "EST",
-        "GE": "GEO",
-        "HR": "HRV",
-        "HU": "HUN",
-        "KG": "KGZ",
-        "KZ": "KAZ",
-        "LT": "LTU",
-        "LV": "LVA",
-        "MD": "MDA",
-        "ME": "MNE",
-        "MK": "MKD",
-        "PL": "POL",
-        "RO": "ROU",
-        "RS": "SRB",
-        "RU": "RUS",
-        "SI": "SVN",
-        "SK": "SVK",
-        "TJ": "TJK",
-        "TM": "TKM",
-        "TR": "TUR",
-        "UA": "UKR",
-        "UZ": "UZB",
-    },
-        "UNIT_MEASURE": {
-            "PER": "PS",
-            "PT": "PCNT",
-        },
-        "AGE": {
-            "UNDER1_AGE": "M023",
-        },
-        "LOCATION": {
-            "RUR": "R",
-            "URB": "U",
-            "_Z": "_T",
-            "_T": "_T"
-        }
-    }
-
-    def __init__(self, source_config_file):
+    def __init__(self, source_config_file, colMap, codeMap):
         datalist = fileUtils.CsvUtils.readDictionaryFromCSV(source_config_file)
+        self._colMap = colMap
+        self._codeMap = codeMap
         self._toProcess = []
         for l in datalist:
-            self._toProcess.append(
-                {"dataflowId": [l['agency'], l['df'], l['ver']],
-                 "dq": l["dq"],
-                 "params": UNESCO.query_params,
-                 "tmp_file": l["tmp_file"],
-                 "const": {
-                     "UNICEF_INDICATOR": l["UNICEF_INDICATOR"],
-                     "DATA_SOURCE": l["DATA_SOURCE"],
-                     "OBS_FOOTNOTE": l["OBS_FOOTNOTE"]
-                 }
-                 }
-            )
+            toAppend = {"dataflowId": [l['agency'], l['df'], l['ver']],
+                        "dq": l["dq"],
+                        "params": UNESCO.query_params,
+                        "tmp_file": l["tmp_file"],
+                        "const": {
+
+                        }
+                        }
+            for k in l:
+                if k.startswith("c_"):
+                    toAppend["const"][k.replace("c_","")]=l[k]
+            self._toProcess.append(toAppend)
 
     def download_data(self, outfile_path, skipIfExists=False, verb=0):
         for toDown in self._toProcess:
@@ -135,8 +73,9 @@ class UNESCO:
     def getdata(self, workingPath, cols, filterFunction=None):
         ret = pd.DataFrame(columns=cols, dtype=str)
         for p in self._toProcess:
-            toAdd = self._process(os.path.join(workingPath, p['tmp_file']), UNESCO.codemap_UNESCO, UNESCO.colMap_UNESCO, p['const'],
-                             filterFun=filterFunction)
+            toAdd = self._process(os.path.join(workingPath, p['tmp_file']), self._codeMap, self._colMap,
+                                  p['const'],
+                                  filterFun=filterFunction)
             self.append = ret.append(toAdd)
             ret = self.append
         return ret
