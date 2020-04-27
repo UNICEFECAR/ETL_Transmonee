@@ -215,27 +215,106 @@ else:
 destination.dropna(subset=["OBS_VALUE"], inplace=True)
 
 destination['Dataflow'] = "ECARO:TRANSMONEE(1.0)"
-#change the column order
+# change the column order
 destination.columns = struct.getCSVColumns()
 
 destination.to_csv(os.path.join(DIR_output, OUT_FILE), sep=",", header=True, encoding="utf-8", index=False)
 
-
 destination2 = pd.DataFrame(columns=struct.getCSVColumns(), dtype=str)
 
-
 import tasks.transmonee_files.Transmonee_data
-colMap_tm_SOC_PROT={}
+
+colMap_tm = {
+    "REF_AREA": {"type": "col", "role": "dim", "value": "country"},
+    "UNICEF_INDICATOR": {"type": "col", "role": "dim", "value": "indicator"},
+    "SEX": {"type": "const", "role": "dim"},
+    "AGE": {"type": "const", "role": "dim"},
+    "WEALTH_QUINTILE": {"type": "const", "role": "dim"},
+    "RESIDENCE": {"type": "const", "role": "dim"},
+    "TIME_PERIOD": {"type": "col", "role": "time", "value": "year"},
+    "OBS_VALUE": {"type": "col", "role": "obs", "value": "value"},
+    "UNIT_MEASURE": {"type": "const", "role": "attrib"},
+    "OBS_FOOTNOTE": {"type": "const", "role": "attrib", },
+    "FREQ": {"type": "const", "role": "attrib"},
+    "DATA_SOURCE": {"type": "const", "role": "attrib"},
+    "UNIT_MULTIPLIER": {"type": "const", "role": "attrib"},
+    "OBS_STATUS": {"type": "const", "role": "attrib"},
+}
+
+const = {
+    "SEX": "_T",
+    "AGE": "_T",
+    "WEALTH_QUINTILE": "_T",
+    "RESIDENCE": "_T",
+    "UNIT_MEASURE": "PCNT",
+    "OBS_FOOTNOTE": "",
+    "FREQ": "",
+    "DATA_SOURCE": "",
+    "UNIT_MULTIPLIER": "",
+    "OBS_STATUS": ""
+}
+
+transMoneecodeMap = {"country": {
+    "albania": "ALB",
+    "armenia": "ARM",
+    "azerbaijan": "AZE",
+    "belarus": "BLR",
+    "bosnia and herzegovina": "BIH",
+    "bulgaria": "BGR",
+    "croatia": "HRV",
+    "czech republic": "CZE",
+    "estonia": "EST",
+    "georgia": "GEO",
+    "hungary": "HUN",
+    "kazakhstan": "KAZ",
+    "kyrgyzstan": "KGZ",
+    "latvia": "LVA",
+    "lithuania": "LTU",
+    "moldova": "MDA",
+    "montenegro": "MNE",
+    "poland": "POL",
+    "romania": "ROU",
+    "russian federation": "RUS",
+    "serbia": "SRB",
+    "slovakia": "SVK",
+    "slovenia": "SVN",
+    "tajikistan": "TJK",
+    "the former yugoslav republic of macedonia": "MKD",
+    "turkmenistan": "TKM",
+    "ukraine": "UKR",
+    "uzbekistan": "UZB",
+},
+    "indicator": {
+        "8.1.1 Total Social Protection expenditure as % of GDP": "SP_TOT",
+        "8.1.2 Expenditure on cash social benefits as % of GDP": "SP_SOC_BEN_CASH",
+        "8.1.3 Expenditure on social benefits in kind as % of GDP": "SP_BEN_KIND",
+        "8.1.4 Expenditure on social benefits under Family/Children function as % of GDP": "SP_BEN_FAMILY",
+        "8.1.5 Expenditure on cash social benefits under Family/Children function as % of GDP": "SP_BEN_FAMILY_CASH",
+        "8.1.6 Expenditure on social benefits in kind under Family/Children function as % of GDP": "SP_BEN_FAMILY_KIND",
+        "8.1.7 Expenditure on means-tested social protection benefits as % of total social protection expenditure ": "SP_MEANS_TESTED",
+        "8.1.8 Expenditure on cash social benefits as % of total social protection expenditure": "SP_CASH_EXP",
+        "8.1.9 Expenditure on social benefits in kind as % of total social protection expenditure": "SP_KIND_EXP",
+        "8.1.10 Expenditure on social benefits under Family/Children function as % of total social protection expenditure ": "SP_BEN_FAMILY_EXP",
+        "8.1.11 Social benefits in kind under family/children function as % of total social benefits in kind  ": "SP_KIND_FAMILY_KIND",
+        "8.1.12 Expenditure on Family allowances as % of total cash expenditure under family/children function ": "SP_FAMILY_ALLOW",
+        "8.1.13 Expenditure on Income compensation during maternity as % of total cash expenditure under family/children function ": "SP_IMCOME_MATERNITY",
+        "8.1.14  Expenditure on Parental leave as % of total cash expenditure under family/children function ": "SP_PARENTAL_LEAVE",
+        "8.1.15 Expenditure on Birth grant as % of total cash expenditure under family/children function ": "SP_BITRH_GRANT",
+        "8.1.16 Expenditure on other family cash social benefits as % of total cash expenditure under family/children function ": "SP_OTHER_FAMILY",
+
+    }
+
+}
+
 SOC_PROT_GOV_INT = "Z:\\TransMonee\\01_getData\\from_site\\8.1-Government-interventions.xlsx"
 task = tasks.transmonee_files.Transmonee_data.TransmoneeData(SOC_PROT_GOV_INT)
-data_soc_prot=task.getdata(struct.getCSVColumns(),colMap_tm_SOC_PROT)
-destination2=destination2.append(data_soc_prot)
+data_soc_prot = task.getdata(struct.getCSVColumns(), colMap_tm, const, codeMap=transMoneecodeMap)
+destination2 = destination2.append(data_soc_prot)
 
+const["UNIT_MEASURE"] = "NUMBER"
 SOC_PROT_FAMILYSUPPORT = "Z:\\TransMonee\\01_getData\\from_site\\8.2-Family-support.xlsx"
 task = tasks.transmonee_files.Transmonee_data.TransmoneeData(SOC_PROT_FAMILYSUPPORT)
-data_famsupp=task.getdata(struct.getCSVColumns(),colMap_tm_SOC_PROT)
-destination2=destination2.append(data_famsupp)
+data_famsupp = task.getdata(struct.getCSVColumns(), colMap_tm, const, codeMap=transMoneecodeMap)
+destination2 = destination2.append(data_famsupp)
 
 destination2.to_csv(os.path.join(DIR_output, "tm.csv"), sep=",", header=True, encoding="utf-8", index=False)
-
-
