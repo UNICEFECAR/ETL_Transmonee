@@ -75,6 +75,5 @@ class UNESCO:
         for p in self._toProcess:
             toAdd = self._process(os.path.join(workingPath, p['tmp_file']), columnMap, p['const'], codeMap=codeMap,
                                   filterFun=filterFunction)
-            self.append = ret.append(toAdd)
-            ret = self.append
+            ret = ret.append(toAdd)
         return ret

@@ -215,6 +215,27 @@ else:
 destination.dropna(subset=["OBS_VALUE"], inplace=True)
 
 destination['Dataflow'] = "ECARO:TRANSMONEE(1.0)"
+#change the column order
 destination.columns = struct.getCSVColumns()
 
 destination.to_csv(os.path.join(DIR_output, OUT_FILE), sep=",", header=True, encoding="utf-8", index=False)
+
+
+destination2 = pd.DataFrame(columns=struct.getCSVColumns(), dtype=str)
+
+
+import tasks.transmonee_files.Transmonee_data
+colMap_tm_SOC_PROT={}
+SOC_PROT_GOV_INT = "Z:\\TransMonee\\01_getData\\from_site\\8.1-Government-interventions.xlsx"
+task = tasks.transmonee_files.Transmonee_data.TransmoneeData(SOC_PROT_GOV_INT)
+data_soc_prot=task.getdata(struct.getCSVColumns(),colMap_tm_SOC_PROT)
+destination2=destination2.append(data_soc_prot)
+
+SOC_PROT_FAMILYSUPPORT = "Z:\\TransMonee\\01_getData\\from_site\\8.2-Family-support.xlsx"
+task = tasks.transmonee_files.Transmonee_data.TransmoneeData(SOC_PROT_FAMILYSUPPORT)
+data_famsupp=task.getdata(struct.getCSVColumns(),colMap_tm_SOC_PROT)
+destination2=destination2.append(data_famsupp)
+
+destination2.to_csv(os.path.join(DIR_output, "tm.csv"), sep=",", header=True, encoding="utf-8", index=False)
+
+
