@@ -55,7 +55,7 @@ struct = structure.structure.dsd(dsd)
 destination = pd.DataFrame(columns=struct.getCSVColumns(), dtype=str)
 
 # Start processing UNESCO data: download and get destination-shaped data
-
+# The mapping between the data and the DSD columns
 colMap_UNESCO_SDG4_EDUNONFIN = {
 
     "REF_AREA": {"type": "col", "role": "dim", "value": "REF_AREA"},
@@ -73,7 +73,7 @@ colMap_UNESCO_SDG4_EDUNONFIN = {
     "UNIT_MULTIPLIER": {"type": "col", "role": "attrib", "value": "UNIT_MULT"},
     "OBS_STATUS": {"type": "col", "role": "attrib", "value": "OBS_STATUS"},
 }
-
+# the country mappinh gor unesco
 UNESCO_COUNTRY_MAP = {"REF_AREA": {
     "AL": "ALB",
     "AM": "ARM",
@@ -105,6 +105,7 @@ UNESCO_COUNTRY_MAP = {"REF_AREA": {
     "UA": "UKR",
     "UZ": "UZB",
 }}
+# Additional mappings for SDG4 and EDUNONFIN
 UNESCO_CODEMAP_SDG4_EDUNONFIN = {
     "UNIT_MEASURE": {
         "PER": "PS",
@@ -126,6 +127,7 @@ UNESCO_CODEMAP_SDG4_EDUNONFIN = {
 
 
 # UNESCO SDG4 dataflow
+# the data filter function
 def filterSDG4(df):
     # just keep the _T as socioeconomic background
     ret = df[(df["SE_BKGRD"] == "_T") | (df["SE_BKGRD"] == "_Z")]
@@ -134,35 +136,38 @@ def filterSDG4(df):
     return ret
 
 
-task = tasks.unesco.unesco.UNESCO(UNESCO_SOURCE_CONFIG_SDG4, colMap_UNESCO_SDG4_EDUNONFIN,
-                                  {**UNESCO_COUNTRY_MAP, **UNESCO_CODEMAP_SDG4_EDUNONFIN})
+task = tasks.unesco.unesco.UNESCO(UNESCO_SOURCE_CONFIG_SDG4)
 task.download_data(DIR_dataDownload_UNESCO, True, verb=3)
-srcData = task.getdata(DIR_dataDownload_UNESCO, struct.getCSVColumns(), filterFunction=filterSDG4)
+
+srcData = task.getdata(DIR_dataDownload_UNESCO, struct.getCSVColumns(), colMap_UNESCO_SDG4_EDUNONFIN,
+                       codeMap={**UNESCO_COUNTRY_MAP, **UNESCO_CODEMAP_SDG4_EDUNONFIN}, filterFunction=filterSDG4)
 destination = destination.append(srcData)
 
 
 # UNESCO EDUNonFinance dataflow
 def filterEduNonFin(df):
     # just keep the _T as Education field
-    ret = df[(df["EDU_FIELD"]=="_T") | (df["EDU_FIELD"]=="_Z")]
+    ret = df[(df["EDU_FIELD"] == "_T") | (df["EDU_FIELD"] == "_Z")]
     # just keep the _T as Grade
-    ret = ret[(ret["GRADE"]=="_T") | (ret["GRADE"]=="_Z")]
+    ret = ret[(ret["GRADE"] == "_T") | (ret["GRADE"] == "_Z")]
     # just keep the _T as EDU_TYPE
-    ret = ret[(ret["EDU_TYPE"]=="_T") | (ret["EDU_TYPE"]=="_Z")]
+    ret = ret[(ret["EDU_TYPE"] == "_T") | (ret["EDU_TYPE"] == "_Z")]
     # just keep the _T as EDU_TYPE
-    ret = ret[(ret["EDU_CAT"]=="_T") | (ret["EDU_CAT"]=="_Z")]
+    ret = ret[(ret["EDU_CAT"] == "_T") | (ret["EDU_CAT"] == "_Z")]
 
     return ret
 
 
-task = tasks.unesco.unesco.UNESCO(UNESCO_SOURCE_CONFIG_EDUNONFIN, colMap_UNESCO_SDG4_EDUNONFIN,
-                                  {**UNESCO_COUNTRY_MAP, **UNESCO_CODEMAP_SDG4_EDUNONFIN})
+task = tasks.unesco.unesco.UNESCO(UNESCO_SOURCE_CONFIG_EDUNONFIN)
+
 task.download_data(DIR_dataDownload_UNESCO, True, verb=3)
-srcData = task.getdata(DIR_dataDownload_UNESCO, struct.getCSVColumns(), filterFunction=filterEduNonFin)
+srcData = task.getdata(DIR_dataDownload_UNESCO, struct.getCSVColumns(), colMap_UNESCO_SDG4_EDUNONFIN,
+                       codeMap={**UNESCO_COUNTRY_MAP, **UNESCO_CODEMAP_SDG4_EDUNONFIN}, filterFunction=filterEduNonFin)
 destination = destination.append(srcData)
 
 # UNESCO EDUFinance dataflow
 UNESCO_CODEMAP_EDUFIN = {
+    "UNIT_MEASURE": {"GDP": "GDP_PERC"}
 
 }
 colMap_UNESCO_EDUFIN = {
@@ -193,9 +198,10 @@ def filterEduFin(df):
     return ret
 
 
-task = tasks.unesco.unesco.UNESCO(UNESCO_SOURCE_CONFIG_EDUFIN, colMap_UNESCO_EDUFIN, UNESCO_COUNTRY_MAP)
+task = tasks.unesco.unesco.UNESCO(UNESCO_SOURCE_CONFIG_EDUFIN)
 task.download_data(DIR_dataDownload_UNESCO, True, verb=3)
-srcData = task.getdata(DIR_dataDownload_UNESCO, struct.getCSVColumns(), filterFunction=filterEduFin)
+srcData = task.getdata(DIR_dataDownload_UNESCO, struct.getCSVColumns(), colMap_UNESCO_EDUFIN,
+                       codeMap={**UNESCO_COUNTRY_MAP, **UNESCO_CODEMAP_EDUFIN}, filterFunction=filterEduFin)
 destination = destination.append(srcData)
 
 duplicates = destination[destination.duplicated(subset=struct.get_dims(), keep=False)]

@@ -22,10 +22,9 @@ class UNESCO:
 
     query_params = {"startPeriod": "2000", "endPeriod": "2050", "locale": "en"}
 
-    def __init__(self, source_config_file, colMap, codeMap):
+    def __init__(self, source_config_file):
         datalist = fileUtils.CsvUtils.readDictionaryFromCSV(source_config_file)
-        self._colMap = colMap
-        self._codeMap = codeMap
+
         self._toProcess = []
         for l in datalist:
             toAppend = {"dataflowId": [l['agency'], l['df'], l['ver']],
@@ -38,7 +37,7 @@ class UNESCO:
                         }
             for k in l:
                 if k.startswith("c_"):
-                    toAppend["const"][k.replace("c_","")]=l[k]
+                    toAppend["const"][k.replace("c_", "")] = l[k]
             self._toProcess.append(toAppend)
 
     def download_data(self, outfile_path, skipIfExists=False, verb=0):
@@ -52,7 +51,7 @@ class UNESCO:
             if verb >= 3:
                 print(toDown['tmp_file'] + " " + res)
 
-    def _process(self, input_file, code_map, col_map, constants, filterFun=None, check_for_dups=True):
+    def _process(self, input_file, col_map, constants, codeMap=None, filterFun=None, check_for_dups=True):
         src = pd.read_csv(input_file, dtype=str)
         colMapper = ColumnMapper.ColumnMapper(col_map)
 
@@ -61,20 +60,20 @@ class UNESCO:
 
         if check_for_dups:
             duplicateWarning = colMapper.getDuplicates(src)
-
             if not duplicateWarning.empty:
                 print(input_file + " will generate duplicates")
-        for col in code_map:
-            for m in code_map[col]:
-                src[col].replace(m, code_map[col][m], inplace=True)
+
+        if codeMap is not None:
+            for col in codeMap:
+                for m in codeMap[col]:
+                    src[col].replace(m, codeMap[col][m], inplace=True)
 
         return colMapper.mapDataframe(src, constants)
 
-    def getdata(self, workingPath, cols, filterFunction=None):
+    def getdata(self, workingPath, cols, columnMap, filterFunction=None, codeMap=None):
         ret = pd.DataFrame(columns=cols, dtype=str)
         for p in self._toProcess:
-            toAdd = self._process(os.path.join(workingPath, p['tmp_file']), self._codeMap, self._colMap,
-                                  p['const'],
+            toAdd = self._process(os.path.join(workingPath, p['tmp_file']), columnMap, p['const'], codeMap=codeMap,
                                   filterFun=filterFunction)
             self.append = ret.append(toAdd)
             ret = self.append
