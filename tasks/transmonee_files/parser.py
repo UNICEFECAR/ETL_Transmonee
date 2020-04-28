@@ -32,9 +32,9 @@ def parse_transmonee_file(file):
             parsedNotes.append({
                 "indicator": indic,
                 "noteId": srcData.iloc[i][0],
-                "note": srcData.iloc[i][1]
+                "note": str(srcData.iloc[i][1]).replace("\r\n","").replace("\n","")
             })
-        if re.match("\d{4}", str(srcData.iloc[i][3])):
+        if re.match("\d{4}", str(srcData.iloc[i][3])) and pd.isna(srcData.iloc[i][2]) and pd.isna(srcData.iloc[i][1]):
             yearRow = i
 
     pd_data = pd.DataFrame.from_dict(parsedData)
