@@ -4,7 +4,6 @@ import structure.structure
 import tasks.transmonee_files.taskcfg
 import tasks.transmonee_files.Transmonee_data
 
-import tasks.unesco.unesco
 import tasks.unesco.Unesco_data
 import tasks.eurostat.eurostat
 
@@ -57,8 +56,7 @@ destination = pd.DataFrame(columns=struct.getCSVColumns(), dtype=str)
 
 # Start processing UNESCO data: download and get destination-shaped data
 
-# UNESCO SDG4 dataflow
-# the data filter function
+# Filter functions, used to filter out some values form the datasets
 def filterSDG4(df):
     # just keep the _T as socioeconomic background
     ret = df[(df["SE_BKGRD"] == "_T") | (df["SE_BKGRD"] == "_Z")]
@@ -85,21 +83,31 @@ def filterEduFin(df):
 
     return ret
 
-
-data_sdg4 = tasks.unesco.Unesco_data.getData(cfg_unesco.SOURCE_CONFIG_SDG4, DIR_dataDownload_UNESCO,
+#Processing the SDG4 data
+data = tasks.unesco.Unesco_data.getData(cfg_unesco.SOURCE_CONFIG_SDG4, DIR_dataDownload_UNESCO,
                                              {**cfg_unesco.country_map,**cfg_unesco.codemap_SDG4_EDUNONFIN}, cfg_unesco.colmap_SDG4_EDUNONFIN,
                                          struct.getCSVColumns(), filterSDG4, skipIfExists=True, verb=3)
-destination = destination.append(data_sdg4)
-
-data_edunonfin = tasks.unesco.Unesco_data.getData(cfg_unesco.SOURCE_CONFIG_EDUNONFIN, DIR_dataDownload_UNESCO,
+destination = destination.append(data)
+#Processing the EDU NON FINANCE data
+data = tasks.unesco.Unesco_data.getData(cfg_unesco.SOURCE_CONFIG_EDUNONFIN, DIR_dataDownload_UNESCO,
                                              {**cfg_unesco.country_map,**cfg_unesco.codemap_SDG4_EDUNONFIN}, cfg_unesco.colmap_SDG4_EDUNONFIN,
                                          struct.getCSVColumns(), filterEduNonFin, skipIfExists=True, verb=3)
-destination = destination.append(data_edunonfin)
-
-data_edufin = tasks.unesco.Unesco_data.getData(cfg_unesco.SOURCE_CONFIG_EDUFIN, DIR_dataDownload_UNESCO,
+destination = destination.append(data)
+#Processing the EDU FINANCE data
+data = tasks.unesco.Unesco_data.getData(cfg_unesco.SOURCE_CONFIG_EDUFIN, DIR_dataDownload_UNESCO,
                                              {**cfg_unesco.country_map,**cfg_unesco.codemap_EDUFIN}, cfg_unesco.colmap_EDUFIN,
                                          struct.getCSVColumns(), filterEduFin, skipIfExists=True, verb=3)
-destination = destination.append(data_edufin)
+destination = destination.append(data)
+
+#Adding the data contained in the TransMonEE excel files
+for f in tasks.transmonee_files.taskcfg.files:
+    path = os.path.join(BASE_DIR, f)
+    data = tasks.transmonee_files.Transmonee_data.getData(path, tasks.transmonee_files.taskcfg.codemap,
+                                                          tasks.transmonee_files.taskcfg.colmap,
+                                                          tasks.transmonee_files.taskcfg.const)
+    destination = destination.append(data)
+
+#destination2.to_csv(os.path.join(DIR_output, "tm.csv"), sep=",", header=True, encoding="utf-8", index=False)
 
 
 # remove blanks
@@ -112,13 +120,6 @@ destination.columns = struct.getCSVColumns()
 
 destination.to_csv(os.path.join(DIR_output, OUT_FILE), sep=",", header=True, encoding="utf-8", index=False)
 
-destination2 = pd.DataFrame(columns=struct.getCSVColumns(), dtype=str)
 
-for f in tasks.transmonee_files.taskcfg.files:
-    path = os.path.join(BASE_DIR, f)
-    data = tasks.transmonee_files.Transmonee_data.getData(path, tasks.transmonee_files.taskcfg.codemap,
-                                                          tasks.transmonee_files.taskcfg.colmap,
-                                                          tasks.transmonee_files.taskcfg.const)
-    destination2 = destination2.append(data)
 
-destination2.to_csv(os.path.join(DIR_output, "tm.csv"), sep=",", header=True, encoding="utf-8", index=False)
+
