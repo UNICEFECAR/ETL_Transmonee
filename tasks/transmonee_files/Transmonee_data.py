@@ -9,12 +9,26 @@ class TransmoneeData:
         self._source_file = source_file
 
     def _process(self, data, col_map, constants, codeMap=None):
+        # print(data.head())
         colMapper = ColumnMapper.ColumnMapper(col_map)
 
         if codeMap is not None:
             for col in codeMap:
-                for m in codeMap[col]:
-                    data[col].replace(m, codeMap[col][m], inplace=True)
+
+                if "depends" in codeMap[col]:
+                    for m in codeMap[col]['map']:
+                        sourceCol = codeMap[col]["depends"]
+
+                        mask = data[sourceCol] == m
+
+
+                        data[col][mask] = codeMap[col]["map"][m]
+
+
+
+                else:
+                    for m in codeMap[col]:
+                        data[col].replace(m, codeMap[col][m], inplace=True)
 
         mapped = colMapper.mapDataframe(data, constants)
         return mapped

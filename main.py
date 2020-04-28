@@ -233,8 +233,8 @@ colMap_tm = {
     "RESIDENCE": {"type": "const", "role": "dim"},
     "TIME_PERIOD": {"type": "col", "role": "time", "value": "year"},
     "OBS_VALUE": {"type": "col", "role": "obs", "value": "value"},
-    "UNIT_MEASURE": {"type": "const", "role": "attrib"},
-    "OBS_FOOTNOTE": {"type": "const", "role": "attrib", },
+    "UNIT_MEASURE": {"type": "col", "role": "attrib", "value": "unit"},
+    "OBS_FOOTNOTE": {"type": "col", "role": "attrib", "value": "note"},
     "FREQ": {"type": "const", "role": "attrib"},
     "DATA_SOURCE": {"type": "const", "role": "attrib"},
     "UNIT_MULTIPLIER": {"type": "const", "role": "attrib"},
@@ -246,44 +246,63 @@ const = {
     "AGE": "_T",
     "WEALTH_QUINTILE": "_T",
     "RESIDENCE": "_T",
-    "UNIT_MEASURE": "PCNT",
-    "OBS_FOOTNOTE": "",
     "FREQ": "",
     "DATA_SOURCE": "",
     "UNIT_MULTIPLIER": "",
     "OBS_STATUS": ""
 }
 
-transMoneecodeMap = {"country": {
-    "albania": "ALB",
-    "armenia": "ARM",
-    "azerbaijan": "AZE",
-    "belarus": "BLR",
-    "bosnia and herzegovina": "BIH",
-    "bulgaria": "BGR",
-    "croatia": "HRV",
-    "czech republic": "CZE",
-    "estonia": "EST",
-    "georgia": "GEO",
-    "hungary": "HUN",
-    "kazakhstan": "KAZ",
-    "kyrgyzstan": "KGZ",
-    "latvia": "LVA",
-    "lithuania": "LTU",
-    "moldova": "MDA",
-    "montenegro": "MNE",
-    "poland": "POL",
-    "romania": "ROU",
-    "russian federation": "RUS",
-    "serbia": "SRB",
-    "slovakia": "SVK",
-    "slovenia": "SVN",
-    "tajikistan": "TJK",
-    "the former yugoslav republic of macedonia": "MKD",
-    "turkmenistan": "TKM",
-    "ukraine": "UKR",
-    "uzbekistan": "UZB",
-},
+transmoneeCodeMap = {
+    "unit":
+        {"depends": "indicator",
+         "map": {
+             "8.1.1 Total Social Protection expenditure as % of GDP": "PCNT",
+             "8.1.2 Expenditure on cash social benefits as % of GDP": "PCNT",
+             "8.1.3 Expenditure on social benefits in kind as % of GDP": "PCNT",
+             "8.1.4 Expenditure on social benefits under Family/Children function as % of GDP": "PCNT",
+             "8.1.5 Expenditure on cash social benefits under Family/Children function as % of GDP": "PCNT",
+             "8.1.6 Expenditure on social benefits in kind under Family/Children function as % of GDP": "PCNT",
+             "8.1.7 Expenditure on means-tested social protection benefits as % of total social protection expenditure ": "PCNT",
+             "8.1.8 Expenditure on cash social benefits as % of total social protection expenditure": "PCNT",
+             "8.1.9 Expenditure on social benefits in kind as % of total social protection expenditure": "PCNT",
+             "8.1.10 Expenditure on social benefits under Family/Children function as % of total social protection expenditure ": "PCNT",
+             "8.1.11 Social benefits in kind under family/children function as % of total social benefits in kind  ": "PCNT",
+             "8.1.12 Expenditure on Family allowances as % of total cash expenditure under family/children function ": "PCNT",
+             "8.1.13 Expenditure on Income compensation during maternity as % of total cash expenditure under family/children function ": "PCNT",
+             "8.1.14  Expenditure on Parental leave as % of total cash expenditure under family/children function ": "PCNT",
+             "8.1.15 Expenditure on Birth grant as % of total cash expenditure under family/children function ": "PCNT",
+             "8.1.16 Expenditure on other family cash social benefits as % of total cash expenditure under family/children function ": "PCNT",
+         }},
+    "country": {
+        "albania": "ALB",
+        "armenia": "ARM",
+        "azerbaijan": "AZE",
+        "belarus": "BLR",
+        "bosnia and herzegovina": "BIH",
+        "bulgaria": "BGR",
+        "croatia": "HRV",
+        "czech republic": "CZE",
+        "estonia": "EST",
+        "georgia": "GEO",
+        "hungary": "HUN",
+        "kazakhstan": "KAZ",
+        "kyrgyzstan": "KGZ",
+        "latvia": "LVA",
+        "lithuania": "LTU",
+        "moldova": "MDA",
+        "montenegro": "MNE",
+        "poland": "POL",
+        "romania": "ROU",
+        "russian federation": "RUS",
+        "serbia": "SRB",
+        "slovakia": "SVK",
+        "slovenia": "SVN",
+        "tajikistan": "TJK",
+        "the former yugoslav republic of macedonia": "MKD",
+        "turkmenistan": "TKM",
+        "ukraine": "UKR",
+        "uzbekistan": "UZB",
+    },
     "indicator": {
         "8.1.1 Total Social Protection expenditure as % of GDP": "SP_TOT",
         "8.1.2 Expenditure on cash social benefits as % of GDP": "SP_SOC_BEN_CASH",
@@ -302,19 +321,25 @@ transMoneecodeMap = {"country": {
         "8.1.15 Expenditure on Birth grant as % of total cash expenditure under family/children function ": "SP_BITRH_GRANT",
         "8.1.16 Expenditure on other family cash social benefits as % of total cash expenditure under family/children function ": "SP_OTHER_FAMILY",
 
-    }
 
+    }
 }
 
 SOC_PROT_GOV_INT = "Z:\\TransMonee\\01_getData\\from_site\\8.1-Government-interventions.xlsx"
 task = tasks.transmonee_files.Transmonee_data.TransmoneeData(SOC_PROT_GOV_INT)
-data_soc_prot = task.getdata(struct.getCSVColumns(), colMap_tm, const, codeMap=transMoneecodeMap)
-destination2 = destination2.append(data_soc_prot)
+tm_data = task.getdata(struct.getCSVColumns(), colMap_tm, const, codeMap=transmoneeCodeMap)
+destination2 = destination2.append(tm_data)
 
 const["UNIT_MEASURE"] = "NUMBER"
 SOC_PROT_FAMILYSUPPORT = "Z:\\TransMonee\\01_getData\\from_site\\8.2-Family-support.xlsx"
 task = tasks.transmonee_files.Transmonee_data.TransmoneeData(SOC_PROT_FAMILYSUPPORT)
-data_famsupp = task.getdata(struct.getCSVColumns(), colMap_tm, const, codeMap=transMoneecodeMap)
-destination2 = destination2.append(data_famsupp)
+tm_data = task.getdata(struct.getCSVColumns(), colMap_tm, const, codeMap=transmoneeCodeMap)
+destination2 = destination2.append(tm_data)
+
+# const["UNIT_MEASURE"] = "VARIOUS!!!!!"
+# SOC_PROT_NO_PARENTAL_CARE = "Z:\\TransMonee\\01_getData\\from_site\\6.1-Children-left-without-parental-care-during-the-reference-year.xlsx"
+# task = tasks.transmonee_files.Transmonee_data.TransmoneeData(SOC_PROT_NO_PARENTAL_CARE)
+# tm_data = task.getdata(struct.getCSVColumns(), colMap_tm, const, codeMap=transmoneeCodeMap)
+# destination2 = destination2.append(tm_data)
 
 destination2.to_csv(os.path.join(DIR_output, "tm.csv"), sep=",", header=True, encoding="utf-8", index=False)

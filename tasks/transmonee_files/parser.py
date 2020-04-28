@@ -20,7 +20,7 @@ def parse_transmonee_file(file):
         elif str(srcData.iloc[i][1]).strip().lower() in countries:
             country = srcData.iloc[i][1].strip().lower()
             for c in range(3, len(srcData.columns)):
-                if re.match("\d{4}", srcData.iloc[yearRow][c]) is not None:
+                if not pd.isna(srcData.iloc[yearRow][c]) and re.match("\d{4}", srcData.iloc[yearRow][c]) is not None:
                     parsedData.append({
                         "country": country,
                         "indicator": indic,
@@ -43,4 +43,5 @@ def parse_transmonee_file(file):
     merged = pd.merge(pd_data, pd_notes, how="left", left_on=['indicator', 'noteId'], right_on=['indicator', 'noteId'])
     merged.drop(columns=['noteId'], inplace=True)
     merged = merged[merged['value'] != "-"]
+    merged['unit']=""
     return merged
