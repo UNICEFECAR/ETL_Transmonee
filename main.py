@@ -1,8 +1,8 @@
 import os.path
 import pandas as pd
 import structure.structure
+import tasks.transmonee_files.taskcfg
 import tasks.transmonee_files.Transmonee_data
-import source_configs.transmonee.Transmonee
 
 import tasks.unesco.unesco
 import tasks.eurostat.eurostat
@@ -223,12 +223,15 @@ destination.to_csv(os.path.join(DIR_output, OUT_FILE), sep=",", header=True, enc
 
 destination2 = pd.DataFrame(columns=struct.getCSVColumns(), dtype=str)
 
-for f in source_configs.transmonee.Transmonee.files:
+for f in tasks.transmonee_files.taskcfg.files:
     path = os.path.join(BASE_DIR, f)
-    task = tasks.transmonee_files.Transmonee_data.TransmoneeData()
-    data = task.readSource(path)
-    data = task.map_codes(data, source_configs.transmonee.Transmonee.codemap)
-    data = task.mapcols(data, source_configs.transmonee.Transmonee.colmap, source_configs.transmonee.Transmonee.const)
+    # task = tasks.transmonee_files.Transmonee_data.TransmoneeData()
+    # data = task.readSource(path)
+    # data = task.map_codes(data, tasks.transmonee_files.taskcfg.codemap)
+    # data = task.mapcols(data, tasks.transmonee_files.taskcfg.colmap, tasks.transmonee_files.taskcfg.const)
+    data = tasks.transmonee_files.Transmonee_data.getData(path, tasks.transmonee_files.taskcfg.codemap,
+                                                          tasks.transmonee_files.taskcfg.colmap,
+                                                          tasks.transmonee_files.taskcfg.const)
     destination2 = destination2.append(data)
-    
+
 destination2.to_csv(os.path.join(DIR_output, "tm.csv"), sep=",", header=True, encoding="utf-8", index=False)
