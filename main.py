@@ -25,6 +25,8 @@ DIR_dataDownload_EUROSTAT = BASE_DIR + "\\" + "dl\\eurostat"
 DIR_output = BASE_DIR + "\\" + "out"
 OUT_FILE = "ETL_out.csv"
 
+OUTPUT_DATAFLOW = "ECARO:TRANSMONEE(1.0)"
+
 # the output format (similar to a SDMX Data Structure Definition)
 dsd = [
     {"id": "Dataflow", "type": "string"},
@@ -35,9 +37,9 @@ dsd = [
     {"id": "SEX", "type": "string", "role": "dim"},
     {"id": "AGE", "type": "string", "role": "dim"},
     {"id": "RESIDENCE", "type": "string", "role": "dim", "codes": ["_T", "U", "R"]},
-    {"id": "WEALTH_QUINTILE", "type": "string", "role": "dim",
-     "codes": ["_T", "Q1", "Q2", "Q3", "Q4", "Q5", "B20", "B40", "B60", "B80", "M40", "M60", "R20", "R40", "R60",
-               "R80"]},
+    # {"id": "WEALTH_QUINTILE", "type": "string", "role": "dim",
+    #  "codes": ["_T", "Q1", "Q2", "Q3", "Q4", "Q5", "B20", "B40", "B60", "B80", "M40", "M60", "R20", "R40", "R60",
+    #            "R80"]},
     {"id": "TIME_PERIOD", "type": "string", "role": "time"},
     {"id": "OBS_VALUE", "type": "string"},
     {"id": "UNIT_MEASURE", "type": "string"},
@@ -64,6 +66,7 @@ def filterSDG4(df):
     ret = ret[(ret["IMM_STATUS"] == "_T") | (ret["IMM_STATUS"] == "_Z")]
     return ret
 
+
 def filterEduNonFin(df):
     # just keep the _T as Education field
     ret = df[(df["EDU_FIELD"] == "_T") | (df["EDU_FIELD"] == "_Z")]
@@ -75,6 +78,7 @@ def filterEduNonFin(df):
     ret = ret[(ret["EDU_CAT"] == "_T") | (ret["EDU_CAT"] == "_Z")]
     return ret
 
+
 def filterEduFin(df):
     # just keep the _T as Type of expenditure
     ret = df[df["EXPENDITURE_TYPE"] == "_T"]
@@ -83,23 +87,27 @@ def filterEduFin(df):
 
     return ret
 
-#Processing the SDG4 data
+
+# #Processing the SDG4 data
 data = tasks.unesco.Unesco_data.getData(cfg_unesco.SOURCE_CONFIG_SDG4, DIR_dataDownload_UNESCO,
-                                             {**cfg_unesco.country_map,**cfg_unesco.codemap_SDG4_EDUNONFIN}, cfg_unesco.colmap_SDG4_EDUNONFIN,
-                                         struct.getCSVColumns(), filterSDG4, skipIfExists=True, verb=3)
+                                        {**cfg_unesco.country_map, **cfg_unesco.codemap_SDG4_EDUNONFIN},
+                                        cfg_unesco.colmap_SDG4_EDUNONFIN,
+                                        struct.getCSVColumns(), filterSDG4, skipIfExists=True, verb=3)
 destination = destination.append(data)
-#Processing the EDU NON FINANCE data
+# Processing the EDU NON FINANCE data
 data = tasks.unesco.Unesco_data.getData(cfg_unesco.SOURCE_CONFIG_EDUNONFIN, DIR_dataDownload_UNESCO,
-                                             {**cfg_unesco.country_map,**cfg_unesco.codemap_SDG4_EDUNONFIN}, cfg_unesco.colmap_SDG4_EDUNONFIN,
-                                         struct.getCSVColumns(), filterEduNonFin, skipIfExists=True, verb=3)
+                                        {**cfg_unesco.country_map, **cfg_unesco.codemap_SDG4_EDUNONFIN},
+                                        cfg_unesco.colmap_SDG4_EDUNONFIN,
+                                        struct.getCSVColumns(), filterEduNonFin, skipIfExists=True, verb=3)
 destination = destination.append(data)
-#Processing the EDU FINANCE data
+# Processing the EDU FINANCE data
 data = tasks.unesco.Unesco_data.getData(cfg_unesco.SOURCE_CONFIG_EDUFIN, DIR_dataDownload_UNESCO,
-                                             {**cfg_unesco.country_map,**cfg_unesco.codemap_EDUFIN}, cfg_unesco.colmap_EDUFIN,
-                                         struct.getCSVColumns(), filterEduFin, skipIfExists=True, verb=3)
+                                        {**cfg_unesco.country_map, **cfg_unesco.codemap_EDUFIN},
+                                        cfg_unesco.colmap_EDUFIN,
+                                        struct.getCSVColumns(), filterEduFin, skipIfExists=True, verb=3)
 destination = destination.append(data)
 
-#Adding the data contained in the TransMonEE excel files
+# Adding the data contained in the TransMonEE excel files
 for f in tasks.transmonee_files.taskcfg.files:
     path = os.path.join(BASE_DIR, f)
     data = tasks.transmonee_files.Transmonee_data.getData(path, tasks.transmonee_files.taskcfg.codemap,
@@ -107,19 +115,15 @@ for f in tasks.transmonee_files.taskcfg.files:
                                                           tasks.transmonee_files.taskcfg.const)
     destination = destination.append(data)
 
-#destination2.to_csv(os.path.join(DIR_output, "tm.csv"), sep=",", header=True, encoding="utf-8", index=False)
-
-
-# remove blanks
+# remove blanks, "-", ".."
 destination.dropna(subset=["OBS_VALUE"], inplace=True)
+destination = destination[destination["OBS_VALUE"] != "-"]
+destination = destination[destination["OBS_VALUE"] != ".."]
 
-destination['Dataflow'] = "ECARO:TRANSMONEE(1.0)"
+# Add the constant dataflow id
+destination['Dataflow'] = OUTPUT_DATAFLOW
 
 # change the column order
 destination.columns = struct.getCSVColumns()
-
+# write the csv-sdmx
 destination.to_csv(os.path.join(DIR_output, OUT_FILE), sep=",", header=True, encoding="utf-8", index=False)
-
-
-
-

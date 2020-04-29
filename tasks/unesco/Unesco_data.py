@@ -58,36 +58,3 @@ def getData(source_config_file, temp_dir, codemap, colmap, destination_cols, fil
         ret = ret.append(data)
 
     return ret
-
-
-'''
-
-
-    def _process(self, input_file, col_map, constants, codeMap=None, filterFun=None, check_for_dups=True):
-        src = pd.read_csv(input_file, dtype=str)
-        colMapper = ColumnMapper.ColumnMapper(col_map)
-
-        if filterFun is not None:
-            src = filterFun(src)
-
-        if check_for_dups:
-            duplicateWarning = colMapper.getDuplicates(src)
-            if not duplicateWarning.empty:
-                print(input_file + " will generate duplicates")
-
-        if codeMap is not None:
-            for col in codeMap:
-                for m in codeMap[col]:
-                    src[col].replace(m, codeMap[col][m], inplace=True)
-
-        return colMapper.mapDataframe(src, constants)
-
-    def getdata(self, workingPath, cols, columnMap, filterFunction=None, codeMap=None):
-        ret = pd.DataFrame(columns=cols, dtype=str)
-        for p in self._toProcess:
-            toAdd = self._process(os.path.join(workingPath, p['tmp_file']), columnMap, p['const'], codeMap=codeMap,
-                                  filterFun=filterFunction)
-            ret = ret.append(toAdd)
-        return ret
-
-'''

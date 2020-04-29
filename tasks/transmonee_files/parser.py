@@ -25,7 +25,7 @@ def parse_transmonee_file(file):
                         "country": country,
                         "indicator": indic,
                         "year": srcData.iloc[yearRow][c],
-                        "value": srcData.iloc[i][c],
+                        "value": srcData.iloc[i][c].strip(),
                         "noteId": srcData.iloc[i][2],
                     })
         elif re.match("^\d+$", str(srcData.iloc[i][0])):

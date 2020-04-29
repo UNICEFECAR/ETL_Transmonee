@@ -1,3 +1,6 @@
+# import pandas as pd
+# pd.set_option('display.min_rows', 50000)
+
 def map_codes(data, codemap):
     DEP = "depends"
     MAP = "map"
