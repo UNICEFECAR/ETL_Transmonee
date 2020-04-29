@@ -72,8 +72,6 @@ def filterEduNonFin(df):
     # just keep the _T as Education field
     ret = df[(df["EDU_FIELD"] == "_T") | (df["EDU_FIELD"] == "_Z")]
     # just keep the _T as Grade
-    # ret = ret[(ret["GRADE"] == "_T") | (ret["GRADE"] == "_Z")]
-    # # just keep the _T as EDU_TYPE
     ret = ret[(ret["EDU_TYPE"] == "_T") | (ret["EDU_TYPE"] == "_Z")]
     # just keep the _T as EDU_TYPE
     ret = ret[(ret["EDU_CAT"] == "_T") | (ret["EDU_CAT"] == "_Z")]
