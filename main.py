@@ -37,9 +37,9 @@ dsd = [
     {"id": "SEX", "type": "string", "role": "dim"},
     {"id": "AGE", "type": "string", "role": "dim"},
     {"id": "RESIDENCE", "type": "string", "role": "dim", "codes": ["_T", "U", "R"]},
-    # {"id": "WEALTH_QUINTILE", "type": "string", "role": "dim",
-    #  "codes": ["_T", "Q1", "Q2", "Q3", "Q4", "Q5", "B20", "B40", "B60", "B80", "M40", "M60", "R20", "R40", "R60",
-    #            "R80"]},
+    {"id": "WEALTH_QUINTILE", "type": "string", "role": "dim",
+     "codes": ["_T", "Q1", "Q2", "Q3", "Q4", "Q5", "B20", "B40", "B60", "B80", "M40", "M60", "R20", "R40", "R60",
+               "R80"]},
     {"id": "TIME_PERIOD", "type": "string", "role": "time"},
     {"id": "OBS_VALUE", "type": "string"},
     {"id": "UNIT_MEASURE", "type": "string"},
@@ -67,12 +67,13 @@ def filterSDG4(df):
     return ret
 
 
+
 def filterEduNonFin(df):
     # just keep the _T as Education field
     ret = df[(df["EDU_FIELD"] == "_T") | (df["EDU_FIELD"] == "_Z")]
     # just keep the _T as Grade
-    ret = ret[(ret["GRADE"] == "_T") | (ret["GRADE"] == "_Z")]
-    # just keep the _T as EDU_TYPE
+    # ret = ret[(ret["GRADE"] == "_T") | (ret["GRADE"] == "_Z")]
+    # # just keep the _T as EDU_TYPE
     ret = ret[(ret["EDU_TYPE"] == "_T") | (ret["EDU_TYPE"] == "_Z")]
     # just keep the _T as EDU_TYPE
     ret = ret[(ret["EDU_CAT"] == "_T") | (ret["EDU_CAT"] == "_Z")]
@@ -125,5 +126,6 @@ destination['Dataflow'] = OUTPUT_DATAFLOW
 
 # change the column order
 destination.columns = struct.getCSVColumns()
+
 # write the csv-sdmx
 destination.to_csv(os.path.join(DIR_output, OUT_FILE), sep=",", header=True, encoding="utf-8", index=False)

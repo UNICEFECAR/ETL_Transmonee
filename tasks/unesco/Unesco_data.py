@@ -49,7 +49,7 @@ def getData(source_config_file, temp_dir, codemap, colmap, destination_cols, fil
 
         duplicateWarning = colmapper.getDuplicates(data)
         if not duplicateWarning.empty:
-            print(p + " will generate duplicates")
+            print(p['tmp_file'] + " will generate duplicates")
         if codemap is not None:
             data = CodeMapper.map_codes(data, codemap)
 

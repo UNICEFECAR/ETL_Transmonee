@@ -11,7 +11,7 @@ colmap = {
     "UNICEF_INDICATOR": {"type": "col", "role": "dim", "value": "indicator"},
     "SEX": {"type": "col", "role": "dim", "value": "sex"},
     "AGE": {"type": "col", "role": "dim", "value": "age"},
-    # "WEALTH_QUINTILE": {"type": "const", "role": "dim"},
+    "WEALTH_QUINTILE": {"type": "const", "role": "dim"},
     "RESIDENCE": {"type": "const", "role": "dim"},
     "TIME_PERIOD": {"type": "col", "role": "time", "value": "year"},
     "OBS_VALUE": {"type": "col", "role": "obs", "value": "value"},
@@ -26,7 +26,7 @@ colmap = {
 const = {
     # "SEX": "_T",
     # "AGE": "_T",
-    # "WEALTH_QUINTILE": "_T",
+    "WEALTH_QUINTILE": "_T",
     "RESIDENCE": "_T",
     "FREQ": "",
     "DATA_SOURCE": "",
@@ -234,9 +234,6 @@ codemap = {
              "6.4.12 Children available for adoption by age: 3-6 years old (at the end of the year)": "Y3T6",
              "6.4.13 Children available for adoption by age: 7-9 years old (at the end of the year)": "Y7T9",
              "6.4.14 Children available for adoption by age: 10-17 years old (at the end of the year)": "Y10T17",
-
-             "6.4.13 Children available for adoption by age: 7-9 years old (at the end of the year)": "PT_CHLD_ADOPTION_AVAILABLE",
-             "6.4.14 Children available for adoption by age: 10-17 years old (at the end of the year)": "PT_CHLD_ADOPTION_AVAILABLE",
          }},
 
     "country": {

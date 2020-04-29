@@ -18,7 +18,7 @@ colmap_SDG4_EDUNONFIN = {
     "UNICEF_INDICATOR": {"type": "const", "role": "dim", "value": ""},
     "SEX": {"type": "col", "role": "dim", "value": "SEX"},
     "AGE": {"type": "col", "role": "dim", "value": "AGE"},
-    # "WEALTH_QUINTILE": {"type": "col", "role": "dim", "value": "WEALTH_QUINTILE"},
+    "WEALTH_QUINTILE": {"type": "col", "role": "dim", "value": "WEALTH_QUINTILE"},
     "RESIDENCE": {"type": "col", "role": "dim", "value": "LOCATION"},
     "TIME_PERIOD": {"type": "col", "role": "time", "value": "TIME_PERIOD"},
     "OBS_VALUE": {"type": "col", "role": "obs", "value": "OBS_VALUE"},
@@ -67,6 +67,7 @@ codemap_SDG4_EDUNONFIN = {
     "UNIT_MEASURE": {
         "PER": "PS",
         "PT": "PCNT",
+        "NB": "NUMBER",
     },
     "AGE": {
         "UNDER1_AGE": "M023",
@@ -85,14 +86,13 @@ codemap_SDG4_EDUNONFIN = {
 # UNESCO EDUFinance dataflow
 codemap_EDUFIN = {
     "UNIT_MEASURE": {"GDP": "GDP_PERC"}
-
 }
 colmap_EDUFIN = {
     "REF_AREA": {"type": "col", "role": "dim", "value": "REF_AREA"},
     "UNICEF_INDICATOR": {"type": "const", "role": "dim", "value": ""},
     "SEX": {"type": "const", "role": "dim"},
     "AGE": {"type": "const", "role": "dim"},
-    # "WEALTH_QUINTILE": {"type": "const", "role": "dim"},
+    "WEALTH_QUINTILE": {"type": "const", "role": "dim"},
     "RESIDENCE": {"type": "const", "role": "dim"},
     "TIME_PERIOD": {"type": "col", "role": "time", "value": "TIME_PERIOD"},
     "OBS_VALUE": {"type": "col", "role": "obs", "value": "OBS_VALUE"},
