@@ -39,6 +39,7 @@ dsd = [
     {"id": "RESIDENCE", "type": "string", "role": "dim", "codes": ["_T", "U", "R"]},
     {"id": "WEALTH_QUINTILE", "type": "string", "role": "dim",
      "codes": ["_T", "Q1", "Q2", "Q3", "Q4", "Q5", "B20", "B40", "B60", "B80", "M40", "M60", "R20", "R40", "R60",
+
                "R80"]},
     {"id": "TIME_PERIOD", "type": "string", "role": "time"},
     {"id": "OBS_VALUE", "type": "string"},
@@ -74,7 +75,7 @@ def filterEduNonFin(df):
     # just keep the _T as Grade
     ret = ret[(ret["EDU_TYPE"] == "_T") | (ret["EDU_TYPE"] == "_Z")]
     # just keep the _T as EDU_TYPE
-    ret = ret[(ret["EDU_CAT"] == "_T") | (ret["EDU_CAT"] == "_Z")]
+    # ret = ret[(ret["EDU_CAT"] == "_T") | (ret["EDU_CAT"] == "_Z")]
     return ret
 
 
@@ -91,7 +92,7 @@ def filterEduFin(df):
 data = tasks.unesco.Unesco_data.getData(cfg_unesco.SOURCE_CONFIG_SDG4, DIR_dataDownload_UNESCO,
                                         {**cfg_unesco.country_map, **cfg_unesco.codemap_SDG4_EDUNONFIN},
                                         cfg_unesco.colmap_SDG4_EDUNONFIN,
-                                        struct.getCSVColumns(), filterSDG4, skipIfExists=True, verb=3)
+                                        struct.getCSVColumns(), None, skipIfExists=True, verb=3)
 destination = destination.append(data)
 # Processing the EDU NON FINANCE data
 data = tasks.unesco.Unesco_data.getData(cfg_unesco.SOURCE_CONFIG_EDUNONFIN, DIR_dataDownload_UNESCO,
