@@ -61,29 +61,32 @@ destination = pd.DataFrame(columns=struct.getCSVColumns(), dtype=str)
 
 # Filter functions, used to filter out some values form the datasets
 def filterSDG4(df):
+    ret=df.copy()
     # just keep the _T as socioeconomic background
-    ret = df[(df["SE_BKGRD"] == "_T") | (df["SE_BKGRD"] == "_Z")]
+    # ret = df[(df["SE_BKGRD"] == "_T") | (df["SE_BKGRD"] == "_Z")]
     # just keep the _T as Immigration status
-    ret = ret[(ret["IMM_STATUS"] == "_T") | (ret["IMM_STATUS"] == "_Z")]
+    # ret = ret[(ret["IMM_STATUS"] == "_T") | (ret["IMM_STATUS"] == "_Z")]
     return ret
 
 
 
 def filterEduNonFin(df):
+    ret = df.copy()
     # just keep the _T as Education field
-    ret = df[(df["EDU_FIELD"] == "_T") | (df["EDU_FIELD"] == "_Z")]
+    # ret = df[(df["EDU_FIELD"] == "_T") | (df["EDU_FIELD"] == "_Z")]
     # just keep the _T as Grade
-    ret = ret[(ret["EDU_TYPE"] == "_T") | (ret["EDU_TYPE"] == "_Z")]
+    # ret = ret[(ret["EDU_TYPE"] == "_T") | (ret["EDU_TYPE"] == "_Z")]
     # just keep the _T as EDU_TYPE
     # ret = ret[(ret["EDU_CAT"] == "_T") | (ret["EDU_CAT"] == "_Z")]
     return ret
 
 
 def filterEduFin(df):
+    ret = df.copy()
     # just keep the _T as Type of expenditure
-    ret = df[df["EXPENDITURE_TYPE"] == "_T"]
+    # ret = df[df["EXPENDITURE_TYPE"] == "_T"]
     # just keep the _T as Funding Flow
-    ret = ret[ret["FUND_FLOW"] == "_T"]
+    # ret = ret[ret["FUND_FLOW"] == "_T"]
 
     return ret
 
@@ -92,7 +95,7 @@ def filterEduFin(df):
 data = tasks.unesco.Unesco_data.getData(cfg_unesco.SOURCE_CONFIG_SDG4, DIR_dataDownload_UNESCO,
                                         {**cfg_unesco.country_map, **cfg_unesco.codemap_SDG4_EDUNONFIN},
                                         cfg_unesco.colmap_SDG4_EDUNONFIN,
-                                        struct.getCSVColumns(), None, skipIfExists=True, verb=3)
+                                        struct.getCSVColumns(), filterSDG4, skipIfExists=True, verb=3)
 destination = destination.append(data)
 # Processing the EDU NON FINANCE data
 data = tasks.unesco.Unesco_data.getData(cfg_unesco.SOURCE_CONFIG_EDUNONFIN, DIR_dataDownload_UNESCO,

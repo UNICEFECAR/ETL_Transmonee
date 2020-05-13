@@ -6,7 +6,7 @@ URL_PARAMS = {"url": "https://api.uis.unesco.org/sdmx/data/",
                   "Accept-Encoding": "gzip",
               }}
 
-QUERY_PARAMS = {"startPeriod": "2000", "endPeriod": "2050", "locale": "en"}
+QUERY_PARAMS = {"startPeriod": "1989", "endPeriod": "2050", "locale": "en"}
 
 SOURCE_CONFIG_SDG4 = "source_configs\\unesco\\EDU_UIS_SDG4_toDown.csv"
 SOURCE_CONFIG_EDUNONFIN = "source_configs\\unesco\\EDU_UIS_EDUNONFIN_toDown.csv"
